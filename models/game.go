@@ -36,6 +36,7 @@ func GetGameByUrlName(urlname string) (error, Game) {
 func GetGamesByKeyword(word string) (error, []Game) {
 	var games []Game
 	qs := myorm.QueryTable("game")
-	qs.Filter("simple_desc__icontains", word).All(&games)
+	cond := orm.NewCondition()
+	qs.SetCond(cond.And("simple_desc__icontains", word).Or("name__icontains", word)).All(&games)
 	return nil, games
 }
