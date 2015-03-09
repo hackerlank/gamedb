@@ -36,10 +36,23 @@ func GetGameByUrlName(urlname string) (error, Game) {
 	return err, game
 }
 
-func GetGamesByKeyword(word string) (error, []Game) {
+func GetGamesByKeyword(word string, platform string,  genre string, tag string) (error, []Game) {
 	var games []Game
 	qs := myorm.QueryTable("game")
 	cond := orm.NewCondition()
-	qs.SetCond(cond.And("simple_desc__icontains", word).Or("name__icontains", word)).All(&games)
+	var cond1, cond2, cond3, cond4 *orm.Condition
+	if platform != "" {
+		cond1 = cond.And("platform__exact", platform)
+	}
+	if genre != "" {
+		cond2 = cond.And("genre__exact", genre)
+	}
+	if tag != "" {
+		cond3 = cond.And("tags__icontains", tag)
+	}
+	
+	cond4 = cond.And("simple_desc__icontains", word).Or("name__icontains", word)
+	
+	qs.SetCond(cond.AndCond(cond1).AndCond(cond2).AndCond(cond3).AndCond(cond4)).All(&games)
 	return nil, games
 }

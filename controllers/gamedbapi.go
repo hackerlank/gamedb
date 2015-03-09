@@ -20,13 +20,22 @@ func init()  {
 	log.Info("dburl: %s", beego.AppConfig.String("dburl"))
 }
 
-// /search?v=
+// /search?v=VALUE&p=PLATFORM&g=GENRE&t=TAG
 func (this *GamedbapiController) Search()  {
-	var value string
-	this.Ctx.Input.Bind(&value, "v")
-	log.Info("search: value=%s\n", value)
+	value := this.GetString("v")
+	platform := this.GetString("p")
+	genre := this.GetString("g")
+	tag := this.GetString("t")
+	log.Info("search: value=%s, platform=%s, genre=%s, tag=%s\n", value, platform, genre, tag)
+	if value == "" {
+		this.Data["json"] = "invalid arguments"
+		this.ServeJson()
+		return
+	}
+	
 	// this.Ctx.WriteString("hello")
-	err, g := models.GetGamesByKeyword(value)
+	
+	err, g := models.GetGamesByKeyword(value, platform, genre, tag)
 	if err != nil {
 		log.Error("GetGamesByKeyword failed: %v", err)
 		this.Data["json"] = err
