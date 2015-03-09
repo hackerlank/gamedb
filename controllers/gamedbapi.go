@@ -16,7 +16,8 @@ type GamedbapiController struct {
 
 func init()  {
 	log = logs.NewLogger(10000)
-	log.SetLogger("console", "")
+	// log.SetLogger("console", "")
+	log.SetLogger("file", `{"filename":"test.log"}`)
 	log.Info("dburl: %s", beego.AppConfig.String("dburl"))
 }
 
