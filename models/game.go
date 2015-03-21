@@ -38,7 +38,16 @@ func GetGameByUrlName(urlname string) (error, Game) {
 
 func GetGamesByKeyword(word string, platform string,  genre string, tag string) (error, []Game) {
 	var games []Game
+	
+	// sql := fmt.Sprintf("select * from game where name like '%%%s%%' or simple_desc like '%%%s%%'", word, word)
+	// _, err := myorm.Raw(sql).QueryRows(&games)
+	// if err != nil {
+	// 	Log.Error("Query failed: %v", err)
+	// 	return err, nil
+	// }
+	
 	qs := myorm.QueryTable("game")
+	// qs.Limit(-1) // no limit
 	cond := orm.NewCondition()
 	var cond1, cond2, cond3, cond4 *orm.Condition
 	if platform != "" {
@@ -50,9 +59,9 @@ func GetGamesByKeyword(word string, platform string,  genre string, tag string) 
 	if tag != "" {
 		cond3 = cond.And("tags__icontains", tag)
 	}
-	
+
 	cond4 = cond.And("simple_desc__icontains", word).Or("name__icontains", word)
-	
+
 	qs.SetCond(cond.AndCond(cond1).AndCond(cond2).AndCond(cond3).AndCond(cond4)).All(&games)
 	return nil, games
 }
