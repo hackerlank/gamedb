@@ -45,7 +45,7 @@ func GetGamesByKeyword(word string, platform string,  genre string, tag string) 
 		cond1 = cond.And("platform__exact", platform)
 	}
 	if genre != "" {
-		cond2 = cond.And("genre__exact", genre)
+		cond2 = cond.And("genre__icontains", genre)
 	}
 	if tag != "" {
 		cond3 = cond.And("tags__icontains", tag)
