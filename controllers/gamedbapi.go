@@ -16,11 +16,16 @@ func init()  {
 	Log.Info("dburl: %s", beego.AppConfig.String("dburl"))
 }
 
+type SearchOutline struct {
+	Key	string
+	Count int
+}
+
 type SearchResult struct {
 	Ret 	string
 	Games 	[]models.Game
-	PlatformOutline map[string]int
-	GenreOutline map[string]int
+	PlatformOutline []SearchOutline
+	GenreOutline []SearchOutline
 }
 // /search?v=VALUE&p=PLATFORM&g=GENRE&t=TAG
 func (this *GamedbapiController) Search()  {
@@ -43,8 +48,8 @@ func (this *GamedbapiController) Search()  {
 		result.Ret = err.Error()
 	} else {
 		result.Ret = "ok"
-		result.PlatformOutline = make(map[string]int)
-		result.GenreOutline = make(map[string]int)
+		platformOutline := make(map[string]int)
+		genreOutline := make(map[string]int)
 		Log.Warn("count: %d", len(g))
 		if len(g) < 30 {
 			result.Games = g
@@ -56,18 +61,24 @@ func (this *GamedbapiController) Search()  {
 				}
 				platform := g[i].Platform
 				genre := g[i].Genre
-				count, ok := result.PlatformOutline[platform]
+				count, ok := platformOutline[platform]
 				if !ok {
-					result.PlatformOutline[platform] = 1
+					platformOutline[platform] = 1
 				} else {
-					result.PlatformOutline[platform] = count + 1
+					platformOutline[platform] = count + 1
 				}
-				count, ok = result.GenreOutline[genre]
+				count, ok = genreOutline[genre]
 				if !ok {
-					result.GenreOutline[genre] = 1
+					genreOutline[genre] = 1
 				} else {
-					result.GenreOutline[genre] = count + 1
+					genreOutline[genre] = count + 1
 				}
+			}
+			for k, v := range platformOutline {
+				result.PlatformOutline = append(result.PlatformOutline, SearchOutline{k, v})
+			}
+			for k, v := range genreOutline {
+				result.GenreOutline = append(result.GenreOutline, SearchOutline{k, v})
 			}
 		}
 	}
