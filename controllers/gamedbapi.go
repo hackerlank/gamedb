@@ -57,8 +57,10 @@ func (this *GamedbapiController) Search()  {
 		var nameMatched = 0
 		
 		Log.Warn("count: %d", len(g))
-		result.Games = g
 		for i := 0; i < len(g); i++ {
+			if i < 30 {
+				result.Games = append(result.Games, g[i])
+			}
 			if strings.Contains(g[i].Name, value) {
 				nameMatched = nameMatched + 1
 			}
