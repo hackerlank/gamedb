@@ -5,6 +5,7 @@ import (
 	// "encoding/json"
 	"github.com/ro4tub/gamedb/models"
 	. "github.com/ro4tub/gamedb/util"
+	"strings"
 )
 
 
@@ -23,9 +24,11 @@ type SearchOutline struct {
 
 type SearchResult struct {
 	Ret 	string
+	TotalCount int // 总个数
 	Games 	[]models.Game
 	PlatformOutline []SearchOutline
 	GenreOutline []SearchOutline
+	KeywordOutline []SearchOutline
 }
 // /search?v=VALUE&p=PLATFORM&g=GENRE&t=TAG
 func (this *GamedbapiController) Search()  {
@@ -48,39 +51,41 @@ func (this *GamedbapiController) Search()  {
 		result.Ret = err.Error()
 	} else {
 		result.Ret = "ok"
+		result.TotalCount = len(g)
 		platformOutline := make(map[string]int)
 		genreOutline := make(map[string]int)
+		var nameMatched = 0
+		
 		Log.Warn("count: %d", len(g))
-		if len(g) < 30 {
-			result.Games = g
-		} else {
-			for i := 0; i < len(g); i++ {
-				if i < 30 {
-					result.Games = append(result.Games, g[i])
-					continue
-				}
-				platform := g[i].Platform
-				genre := g[i].Genre
-				count, ok := platformOutline[platform]
-				if !ok {
-					platformOutline[platform] = 1
-				} else {
-					platformOutline[platform] = count + 1
-				}
-				count, ok = genreOutline[genre]
-				if !ok {
-					genreOutline[genre] = 1
-				} else {
-					genreOutline[genre] = count + 1
-				}
+		result.Games = g
+		for i := 0; i < len(g); i++ {
+			if strings.Contains(g[i].Name, value) {
+				nameMatched = nameMatched + 1
 			}
-			for k, v := range platformOutline {
-				result.PlatformOutline = append(result.PlatformOutline, SearchOutline{k, v})
+			platform := g[i].Platform
+			genre := g[i].Genre
+			count, ok := platformOutline[platform]
+			if !ok {
+				platformOutline[platform] = 1
+			} else {
+				platformOutline[platform] = count + 1
 			}
-			for k, v := range genreOutline {
-				result.GenreOutline = append(result.GenreOutline, SearchOutline{k, v})
+			count, ok = genreOutline[genre]
+			if !ok {
+				genreOutline[genre] = 1
+			} else {
+				genreOutline[genre] = count + 1
 			}
 		}
+		for k, v := range platformOutline {
+			result.PlatformOutline = append(result.PlatformOutline, SearchOutline{k, v})
+		}
+		for k, v := range genreOutline {
+			result.GenreOutline = append(result.GenreOutline, SearchOutline{k, v})
+		}
+		result.KeywordOutline = append(result.KeywordOutline, SearchOutline{"name", nameMatched})
+		result.KeywordOutline = append(result.KeywordOutline, SearchOutline{"simple_desc", result.TotalCount - nameMatched})
+		
 	}
 	this.Data["json"] = result
 	this.ServeJson()

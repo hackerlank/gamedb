@@ -16,7 +16,7 @@ type Game struct {
 	Platform	string // 机种
 	Genre 		string // 游戏类型
 	ReleaseDate	string // 发布日期
-	tags	string
+	Tags	string
 }
 
 var (
