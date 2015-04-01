@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	// "encoding/json"
+	"encoding/json"
 	"github.com/ro4tub/gamedb/models"
 	. "github.com/ro4tub/gamedb/util"
 	"strings"
@@ -107,5 +107,21 @@ func (this *GamedbapiController) GetGameDetail() {
 	}
 	this.ServeJson()
 }
+
+func (this *GamedbapiController) SaveGameDetail() {
+	// id := this.GetString(":id")
+	Log.Info("SaveGameDetail")
+	g := models.Game{}
+    if err := json.Unmarshal(this.Ctx.Input.RequestBody, &g); err != nil {
+		Log.Error("json.Unmarshal failed: %v", err)
+		this.Data["json"] = err
+     } else {
+		 Log.Info("save game info: %s", g.ToString())
+		 models.SaveGame(g)
+		 this.Data["json"] = g
+     }
+	this.ServeJson()
+}
+
 
 

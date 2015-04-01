@@ -1,6 +1,7 @@
 package models;
 
 import (
+	"fmt"
 	"github.com/astaxie/beego"
     "github.com/astaxie/beego/orm"
     _ "github.com/go-sql-driver/mysql" // import your used driver
@@ -17,6 +18,11 @@ type Game struct {
 	Genre 		string // 游戏类型
 	ReleaseDate	string // 发布日期
 	Tags	string
+}
+
+func (this Game) ToString() string {
+	return fmt.Sprintf("id:%d\nname:%s\nusrname:%s\npic:%s\nsimpledesc:%s\ndetaildesc:%splatform:%s\ngenre:%s\nreleasedate:%s\ntags:%s\n",
+	this.Id, this.Name, this.UrlName, this.Pic, this.SimpleDesc, this.DetailDesc, this.Platform, this.Genre, this.ReleaseDate, this.Tags)
 }
 
 var (
@@ -64,4 +70,10 @@ func GetGamesByKeyword(word string, platform string,  genre string, tag string) 
 
 	qs.SetCond(cond.AndCond(cond1).AndCond(cond2).AndCond(cond3).AndCond(cond4)).All(&games)
 	return nil, games
+}
+
+
+func SaveGame(g Game) (error) {
+	_, err := myorm.Update(&g)
+	return err
 }
